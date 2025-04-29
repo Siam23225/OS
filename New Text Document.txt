@@ -1,0 +1,1361 @@
+1.FCFS
+
+
+#include<bits/stdc++.h>
+using namespace std;
+struct Process
+{
+    int Pid;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+bool compArr(Process p1, Process p2)
+{
+    return p1.arrival_time<p2.arrival_time;
+}
+bool compPid(Process p1, Process p2)
+{
+    return p1.Pid<p2.Pid;
+}
+void findFCFS(vector<Process>&proc,int n)
+{
+    proc[0].completion_time=proc[0].burst_time+proc[0].arrival_time;
+    for(int i=1; i<n; i++)
+        proc[i].completion_time=proc[i-1].completion_time+proc[i].burst_time;
+    for(int i=0; i<n; i++)
+    {
+        proc[i].turnaround_time=proc[i].completion_time-proc[i].arrival_time;
+        proc[i].waiting_time=proc[i].turnaround_time-proc[i].burst_time;
+        if(proc[i].waiting_time<0)
+        {
+            proc[i].waiting_time=0;
+        }
+    }
+}
+void displayFCFS(vector<Process>&proc, int n)
+{
+    cout<<"Process ID\tArrival Time\tBurst Time\tCompletion Time\t\tTurn Around Time\tWaiting Time"<<endl;
+    sort(proc.begin(),proc.end(),compPid);
+    float total_tat=0, total_wt=0;
+    for(int i=0; i<n; i++)
+    {
+        total_tat+=proc[i].turnaround_time;
+        total_wt+=proc[i].waiting_time;
+        cout<<proc[i].Pid<<"         \t"<<proc[i].arrival_time<<"           \t"<<proc[i].burst_time<<"         \t"<<proc[i].completion_time<<"\t\t\t"<<proc[i].turnaround_time<<"\t\t\t"<<proc[i].waiting_time<<endl;
+    }
+    cout<<"Average Turn Around Time : "<<total_tat/n<<endl;
+    cout<<"Average Waiting Time : "<<total_wt/n<<endl;
+}
+int main()
+{
+    int n;
+    cout<<"Enter the number of process: ";
+    cin>>n;
+    vector<Process> proc(n);
+    cout<<"Enter process details: \n";
+    for(int i=0; i<n; i++)
+    {
+        proc[i].Pid=i+1;
+        cout<<"Enter Arrival time of "<<i+1<<" process: ";
+        cin>>proc[i].arrival_time;
+        cout<<"Enter Burst time of "<<i+1<<" process: ";
+        cin>>proc[i].burst_time;
+    }
+    sort(proc.begin(),proc.end(), compArr);
+    findFCFS(proc,n);
+    displayFCFS(proc,n);
+}
+
+
+2.1.SJF non
+
+#include<bits/stdc++.h>
+using namespace std;
+struct Process
+{
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+bool compArr(Process p1, Process p2)
+{
+    return p1.arrival_time<p2.arrival_time;
+}
+bool compPid(Process p1, Process p2)
+{
+    return p1.pid<p2.pid;
+}
+void findSJF_np(vector<Process>&proc, int n)
+{
+    int current_time, minBurst, shortest, remaining_time[n], completeted_process=0;
+    for(int i=0; i<n; i++)
+        remaining_time[i]=proc[i].burst_time;
+    current_time=proc[0].arrival_time;
+    while(completeted_process<n)
+    {
+        minBurst=999999;
+        for(int i=0; i<n; i++)
+        {
+            if(proc[i].arrival_time<=current_time && remaining_time[i]<minBurst && remaining_time[i]>0)
+            {
+                minBurst=proc[i].burst_time;
+                shortest=i;
+            }
+        }
+        current_time+=proc[shortest].burst_time;
+        remaining_time[shortest]=0;
+        completeted_process++;
+        proc[shortest].completion_time=current_time;
+        proc[shortest].turnaround_time=proc[shortest].completion_time-proc[shortest].arrival_time;
+        proc[shortest].waiting_time=proc[shortest].turnaround_time-proc[shortest].burst_time;
+        if(proc[shortest].waiting_time<0)
+            proc[shortest].waiting_time=0;
+
+    }
+}
+void displaySJF_np(vector<Process>&proc, int n)
+{
+    sort(proc.begin(),proc.end(), compPid);
+    float total_tat=0, total_wt=0;
+    cout<<"Process ID\tArrival Time\tBurst Time\tCompletion Time\t\tTurn Around Time\tWaiting Time"<<endl;
+    for(int i=0; i<n; i++)
+    {
+        total_tat+=proc[i].turnaround_time;
+        total_wt+=proc[i].waiting_time;
+        cout<<proc[i].pid<<"    \t\t"<<proc[i].arrival_time<<"\t\t"<<proc[i].burst_time<<"    \t\t"<<proc[i].completion_time<<"\t\t\t"<<proc[i].turnaround_time<<"\t\t\t"<<proc[i].waiting_time<<endl;
+    }
+
+    cout<<"Average Turn Around Time: "<<total_tat/n<<endl;
+    cout<<"Average Waiting Time: "<<total_wt/n<<endl;
+}
+int main()
+{
+    int n;
+    cout<<"Enter Number of Processes: ";
+    cin>>n;
+    vector<Process>proc(n);
+    cout<<"Enter Process Details: \n";
+    for(int i=0; i<n; i++)
+    {
+        proc[i].pid=i+1;
+        cout<<"Enter Arrival Time of Process "<<i+1<<" : ";
+        cin>>proc[i].arrival_time;
+        cout<<"Enter Burst Time of Process "<<i+1<<" : ";
+        cin>>proc[i].burst_time;
+    }
+    sort(proc.begin(),proc.end(), compArr);
+    findSJF_np(proc,n);
+    displaySJF_np(proc,n);
+}
+
+
+
+2.2.SJF PM
+
+
+#include<bits/stdc++.h>
+using namespace std;
+struct Process
+{
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+bool compArr(Process p1, Process p2)
+{
+    return p1.arrival_time<p2.arrival_time;
+}
+bool compPid(Process p1, Process p2)
+{
+    return p1.pid<p2.pid;
+}
+void findSJF(vector<Process>&proc, int n)
+{
+    int remainingtime[n];
+    for(int i=0; i<n; i++)
+        remainingtime[i]=proc[i].burst_time;
+
+    int current_time=0, minBurst, shortest, completed_process=0;
+    current_time=proc[0].arrival_time;
+    while(completed_process<n)
+    {
+        minBurst=9999999;
+        for(int i=0; i<n; i++)
+        {
+            if(proc[i].arrival_time<=current_time && remainingtime[i]<minBurst && remainingtime[i]>0)
+            {
+                minBurst=remainingtime[i];
+                shortest=i;
+            }
+        }
+        remainingtime[shortest]--;
+        current_time++;
+        if(remainingtime[shortest]==0)
+        {
+            completed_process++;
+            proc[shortest].completion_time=current_time;
+            proc[shortest].turnaround_time=proc[shortest].completion_time-proc[shortest].arrival_time;
+            proc[shortest].waiting_time=proc[shortest].turnaround_time-proc[shortest].burst_time;
+            if(proc[shortest].waiting_time<0)
+                proc[shortest].waiting_time=0;
+        }
+    }
+}
+void displaySJF(vector<Process>&proc, int n)
+{
+    sort(proc.begin(),proc.end(), compPid);
+    float total_tat=0, total_wt=0;
+    cout<<"Process ID\tArrival Time\tBurst Time\tCompletion Time\t\tTurn Around Time\tWaiting Time"<<endl;
+    for(int i=0; i<n; i++)
+    {
+        total_tat+=proc[i].turnaround_time;
+        total_wt+=proc[i].waiting_time;
+        cout<<proc[i].pid<<"    \t\t"<<proc[i].arrival_time<<"\t\t"<<proc[i].burst_time<<"    \t\t"<<proc[i].completion_time<<"\t\t\t"<<proc[i].turnaround_time<<"\t\t\t"<<proc[i].waiting_time<<endl;
+    }
+
+    cout<<"Average Turn Around Time: "<<total_tat/n<<endl;
+    cout<<"Average Waiting Time: "<<total_wt/n<<endl;
+}
+int main()
+{
+    int n;
+    cout<<"Enter Number of Processes: ";
+    cin>>n;
+    vector<Process>proc(n);
+    cout<<"Enter Process Details: \n";
+    for(int i=0; i<n; i++)
+    {
+        proc[i].pid=i+1;
+        cout<<"Enter Arrival Time of Process "<<i+1<<" : ";
+        cin>>proc[i].arrival_time;
+        cout<<"Enter Burst Time of Process "<<i+1<<" : ";
+        cin>>proc[i].burst_time;
+    }
+    sort(proc.begin(),proc.end(),compArr);
+    findSJF(proc,n);
+    displaySJF(proc,n);
+}
+
+
+3.RR
+
+#include<bits/stdc++.h>
+using namespace std;
+struct Process
+{
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+bool compArr(Process p1, Process p2)
+{
+    return p1.arrival_time<p2.arrival_time;
+}
+bool compPid(Process p1, Process p2)
+{
+    return p1.pid<p2.pid;
+}
+void findRR(vector<Process>&proc, int n, int quantum)
+{
+   int remaining_time[n];
+  for (int i = 0; i < n; i++) {
+    remaining_time[i] = proc[i].burst_time;
+  }
+  int current_time = 0;
+  bool allDone = false;
+  while (!allDone) {
+    allDone = true;
+    for (int i = 0; i < n; i++) {
+      if (remaining_time[i] > 0) {
+        allDone = false;
+        if (remaining_time[i] > quantum) {
+          current_time = current_time + quantum;
+          remaining_time[i] = remaining_time[i] - quantum;
+        } else {
+          current_time = current_time + remaining_time[i];
+          proc[i].completion_time = current_time;
+          remaining_time[i] = 0;
+          proc[i].turnaround_time=proc[i].completion_time-proc[i].arrival_time;
+          proc[i].waiting_time=proc[i].turnaround_time-proc[i].burst_time;
+          if(proc[i].waiting_time<0)proc[i].waiting_time=0;
+        }
+      }
+    }
+  }
+}
+void displayRR(vector<Process>&proc, int n)
+{
+    sort(proc.begin(),proc.end(), compPid);
+    float total_tat=0, total_wt=0;
+    cout<<"Process ID\tArrival Time\tBurst Time\tCompletion Time\t\tTurn Around Time\tWaiting Time"<<endl;
+    for(int i=0; i<n; i++)
+    {
+        total_tat+=proc[i].turnaround_time;
+        total_wt+=proc[i].waiting_time;
+        cout<<proc[i].pid<<"    \t\t"<<proc[i].arrival_time<<"\t\t"<<proc[i].burst_time<<"    \t\t"<<proc[i].completion_time<<"\t\t\t"<<proc[i].turnaround_time<<"\t\t\t"<<proc[i].waiting_time<<endl;
+    }
+
+    cout<<"Average Turn Around Time: "<<total_tat/n<<endl;
+    cout<<"Average Waiting Time: "<<total_wt/n<<endl;
+}
+int main()
+{
+    int n, quantum;
+    cout<<"Enter the number of Processes: ";
+    cin>>n;
+    vector<Process>proc(n);
+    cout<<"Enter process details\n";
+    for(int i=0; i<n; i++)
+    {
+        proc[i].pid=i+1;
+        cout<<"Enter the arrival time of Process "<<i+1<<" : ";
+        cin>>proc[i].arrival_time;
+        cout<<"Enter the burst time of Process "<<i+1<<" : ";
+        cin>>proc[i].burst_time;
+    }
+    cout<<"Enter the Quantum Time: ";
+    cin>>quantum;
+    sort(proc.begin(),proc.end(),compArr);
+    findRR(proc,n, quantum);
+    displayRR(proc,n);
+}
+
+
+
+4.1.Priority Non
+
+#include<bits/stdc++.h>
+using namespace std;
+struct Process
+{
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int priority;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+bool compArr(Process p1, Process p2)
+{
+    return p1.arrival_time<p2.arrival_time;
+}
+bool compPid(Process p1, Process p2)
+{
+    return p1.pid<p2.pid;
+}
+void findPSN(vector<Process>&proc, int n)
+{
+    int remaining_time[n];
+    for(int i=0; i<n; i++)
+        remaining_time[i]=proc[i].burst_time;
+    int current_time=0, completed_process=0, highest_priority, shortest;
+    current_time= proc[0].arrival_time;
+    while(completed_process<n)
+    {
+        highest_priority=9999999999;
+        for(int i=0; i<n; i++)
+        {
+            if(proc[i].arrival_time<=current_time && remaining_time[i]>0 && proc[i].priority<highest_priority)
+            {
+                highest_priority=proc[i].priority;
+                shortest=i;
+            }
+        }
+        current_time+=remaining_time[shortest];
+        remaining_time[shortest]=0;
+            completed_process++;
+            proc[shortest].completion_time=current_time;
+            proc[shortest].turnaround_time=proc[shortest].completion_time-proc[shortest].arrival_time;
+            proc[shortest].waiting_time=proc[shortest].turnaround_time-proc[shortest].burst_time;
+            if(proc[shortest].waiting_time<0)
+                proc[shortest].waiting_time=0;
+    }
+}
+void displayPSN(vector<Process>&proc, int n)
+{
+     sort(proc.begin(), proc.end(), compPid);
+
+    float total_tat = 0, total_wt = 0;
+    cout << "PID\tArrival\tBurst\tPriority\tCompletion\tTurnaround\tWaiting\n";
+    for (int i = 0; i < n; i++) {
+        total_tat += proc[i].turnaround_time;
+        total_wt += proc[i].waiting_time;
+        cout << proc[i].pid << "\t" << proc[i].arrival_time << "\t"
+             << proc[i].burst_time << "\t" << proc[i].priority << "\t\t"
+             << proc[i].completion_time << "\t\t" << proc[i].turnaround_time
+             << "\t\t" << proc[i].waiting_time << endl;
+    }
+
+    cout << "Average Turnaround Time: " << total_tat / n << endl;
+    cout << "Average Waiting Time: " << total_wt / n << endl;
+}
+int main()
+{
+    int n;
+    cout<<"Enter the number of Processes: ";
+    cin>>n;
+    vector<Process>proc(n);
+    cout<<"Enter process details\n";
+    for(int i=0; i<n; i++)
+    {
+        proc[i].pid=i+1;
+        cout<<"Enter the arrival time of Process "<<i+1<<" : ";
+        cin>>proc[i].arrival_time;
+        cout<<"Enter the burst time of Process "<<i+1<<" : ";
+        cin>>proc[i].burst_time;
+        cout<<"Enter the priority of process "<<i+1<<" : ";
+        cin>>proc[i].priority;
+    }
+    sort(proc.begin(),proc.end(),compArr);
+    findPSN(proc,n);
+    displayPSN(proc,n);
+}
+
+
+4.2.Priority Pm
+
+#include<bits/stdc++.h>
+using namespace std;
+struct Process
+{
+    int pid;
+    int arrival_time;
+    int burst_time;
+    int priority;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+bool compArr(Process p1, Process p2)
+{
+    return p1.arrival_time<p2.arrival_time;
+}
+bool compPid(Process p1, Process p2)
+{
+    return p1.pid<p2.pid;
+}
+void findPSP(vector<Process>&proc, int n)
+{
+    int remaining_time[n];
+    for(int i=0; i<n; i++)
+        remaining_time[i]=proc[i].burst_time;
+    int current_time=0, completed_process=0, highest_priority, shortest;
+    current_time=proc[0].arrival_time;
+    while(completed_process<n)
+    {
+        highest_priority=9999999999;
+        for(int i=0; i<n; i++)
+        {
+            if(proc[i].arrival_time<=current_time && remaining_time[i]>0 && proc[i].priority<highest_priority)
+            {
+                highest_priority=proc[i].priority;
+                shortest=i;
+            }
+        }
+        remaining_time[shortest]--;
+        current_time++;
+        if(remaining_time[shortest]==0)
+        {
+            completed_process++;
+            proc[shortest].completion_time=current_time;
+            proc[shortest].turnaround_time=proc[shortest].completion_time-proc[shortest].arrival_time;
+            proc[shortest].waiting_time=proc[shortest].turnaround_time-proc[shortest].burst_time;
+            if(proc[shortest].waiting_time<0)
+                proc[shortest].waiting_time=0;
+        }
+    }
+}
+void displayPSP(vector<Process>&proc, int n)
+{
+     sort(proc.begin(), proc.end(), compPid);
+
+    float total_tat = 0, total_wt = 0;
+    cout << "PID\tArrival\tBurst\tPriority\tCompletion\tTurnaround\tWaiting\n";
+    for (int i = 0; i < n; i++) {
+        total_tat += proc[i].turnaround_time;
+        total_wt += proc[i].waiting_time;
+        cout << proc[i].pid << "\t" << proc[i].arrival_time << "\t"
+             << proc[i].burst_time << "\t" << proc[i].priority << "\t\t"
+             << proc[i].completion_time << "\t\t" << proc[i].turnaround_time
+             << "\t\t" << proc[i].waiting_time << endl;
+    }
+
+    cout << "Average Turnaround Time: " << total_tat / n << endl;
+    cout << "Average Waiting Time: " << total_wt / n << endl;
+}
+int main()
+{
+    int n;
+    cout<<"Enter the number of Processes: ";
+    cin>>n;
+    vector<Process>proc(n);
+    cout<<"Enter process details\n";
+    for(int i=0; i<n; i++)
+    {
+        proc[i].pid=i+1;
+        cout<<"Enter the arrival time of Process "<<i+1<<" : ";
+        cin>>proc[i].arrival_time;
+        cout<<"Enter the burst time of Process "<<i+1<<" : ";
+        cin>>proc[i].burst_time;
+        cout<<"Enter the priority of process "<<i+1<<" : ";
+        cin>>proc[i].priority;
+    }
+    sort(proc.begin(),proc.end(),compArr);
+    findPSP(proc,n);
+    displayPSP(proc,n);
+}
+
+
+
+5.Banker
+
+#include<bits/stdc++.h>
+using namespace std;
+bool safesequence(int allocated[][10], int max_need[][10], int avail[], int pn, int rn)
+{
+    int remaining_need[pn][rn], safe_sequence[pn]={0}, work[rn], count_process=0;
+    for(int i=0; i<pn; i++)
+    {
+        for(int j=0; j<rn; j++){
+            remaining_need[i][j]=max_need[i][j]-allocated[i][j];
+            if (allocated[i][j] > max_need[i][j]) {
+                cout << "Error: Allocated resources cannot exceed maximum need!\n";
+                return false;
+            }
+    }}
+    for(int i=0; i<rn; i++)
+    {
+        work[i]=avail[i];
+    }
+
+    bool finished[pn];
+    for(int i=0; i<pn; i++)
+        finished[i]=false;
+    bool found;
+    while(count_process<pn)
+    {
+        found=false;
+        for(int i=0; i<pn; i++)
+        {
+            if(!finished[i])
+            {
+                bool canAllocate=true;
+                for(int j=0; j<rn; j++)
+                {
+                    if(remaining_need[i][j]>work[j])
+                    {
+                        canAllocate=false;
+                        break;
+                    }
+                }
+                if(canAllocate)
+                {
+                    for(int j=0; j<rn; j++)
+                        work[j]+=allocated[i][j];
+                    safe_sequence[count_process++]=i;
+                    finished[i]=true;
+                    found=true;
+                }
+            }
+        }
+        if(!found)
+        {
+            cout<<"There is no safe sequence in this process!\nDeadlock detected!";
+            return false;
+        }
+    }
+    cout<<"System is in a safe state.\n The safe sequence is: ";
+    for(int i=0; i<pn-1; i++)
+        cout<<"P"<<safe_sequence[i]+1<<" -> ";
+    cout<<"P"<<safe_sequence[pn-1]+1<<endl;
+    return true;
+}
+int main()
+{
+    int pn, rn;
+    cout<<"Enter the number of Processes: ";
+    cin>>pn;
+    cout<<"Enter the number of Resources: ";
+    cin>>rn;
+    int avail[rn], max_need[pn][10], allocated[pn][10];
+    cout<<endl;
+    for(int i=0; i<pn; i++)
+    { cout<<"Enter the allocated resources of process P"<<i+1<<endl;
+        for(int j=0; j<rn; j++)
+        {
+            cout<<"in process P"<<i+1<<" instance count of resource R"<<j+1<<": ";
+            cin>>allocated[i][j];
+        }
+        cout<<endl;
+    }
+    cout<<endl;
+    for(int i=0; i<pn; i++)
+    { cout<<"Enter the Maximum needed resources of process P"<<i+1<<endl;
+        for(int j=0; j<rn; j++)
+        {
+            cout<<"in process P"<<i+1<<" instance count of resource R"<<j+1<<": ";
+            cin>>max_need[i][j];
+        }
+        cout<<endl;
+    }
+    cout<<"Enter the available resource instances\n ";
+    for(int i=0; i<rn; i++)
+    {
+        cout<<" R"<<i+1<<": ";
+        cin>>avail[i];
+    }
+    safesequence(allocated, max_need, avail, pn, rn);
+}
+
+
+
+6.Reader
+
+#include<bits/stdc++.h>
+#include<semaphore.h>
+#include<thread>
+#include<mutex>
+#ifdef _WIN32
+   #include<windows.h>
+   #define sleep(x) Sleep(1000*(x))
+#else
+   #include<unistd.h>
+#endif
+using namespace std;
+sem_t write_access, read_count_access;
+int reader_count=0;
+vector<int>reader_input, writer_input;
+mutex cout_mutex;
+void reader(int id)
+{
+    int read_times= reader_input[id-1];
+    for(int i=0; i<read_times; i++)
+    {
+        sem_wait(&read_count_access);
+        reader_count++;
+        if(reader_count==1)
+            sem_wait(&write_access);
+        sem_post(&read_count_access);
+        {
+            lock_guard<mutex>lock(cout_mutex);
+            cout<<"Reader "<<id<<" read : "<<i+1<<endl;
+        }
+        if(sem_trywait(&write_access)!=0)
+        {
+            lock_guard<mutex>lock(cout_mutex);
+            cout<<"Reader "<<id<<" waiting for writer to finish writing...\n";
+        }
+        sleep(2);
+        sem_wait(&read_count_access);
+        reader_count--;
+        if(reader_count==0)
+            sem_post(&write_access);
+        sem_post(&read_count_access);
+        sleep(1);
+    }
+}
+void writer(int id)
+{
+    int write_times= writer_input[id-1];
+    for(int i=0; i<write_times; i++)
+    {
+        if(sem_trywait(&write_access)!=0)
+        {
+            lock_guard<mutex>lock(cout_mutex);
+            cout<<"Writer "<<id<<" waiting for another writer or reader to finish...\n";
+        }
+        sem_wait(&write_access);
+        {
+            lock_guard<mutex>lock(cout_mutex);
+            cout<<"Writer "<<id<<" write : "<<i+1<<endl;
+        }
+        sleep(1);
+        sem_post(&write_access);
+    }
+}
+int main()
+{
+    int num_readers, num_writers;
+    cout<<"Enter the number of Readers: ";
+    cin>>num_readers;
+    cout<<"Enter the number of writers: ";
+    cin>>num_writers;
+    sem_init(&write_access, 0, 1);
+    sem_init(&read_count_access, 0, 1);
+    vector<thread>readers, writers;
+    for(int i=0; i<num_readers; i++)
+    {
+        cout<<"Enter the number of reads for Reader "<<i+1<<" : ";
+        int a; cin>>a;
+        reader_input.push_back(a);
+    }
+    for(int i=0; i<num_writers; i++)
+    {
+        cout<<"Enter the number of writes for Writer "<<i+1<<" : ";
+        int a; cin>>a;
+        writer_input.push_back(a);
+    }
+    for(int i=0; i<num_readers; i++)
+        readers.push_back(thread(reader,i+1));
+    for(int i=0; i<num_writers; i++)
+        writers.push_back(thread(writer,i+1));
+    for(auto &r:readers)r.join();
+    for(auto &w:writers)w.join();
+    sem_destroy(&write_access);
+    sem_destroy(&read_count_access);
+}
+
+
+7.Bounded
+
+
+#include<bits/stdc++.h>
+#include<thread>
+#include<semaphore.h>
+#include<mutex>
+#ifdef _WIN32
+ #include<windows.h>
+ #define sleep(x) Sleep(1000*(x))
+#else
+ #include<unistd.h>
+#endif
+using namespace std;
+
+int buffer_size=8;
+queue<int>buffer;
+sem_t empty_slots, full_slots, mutix;
+mutex buffer_mutex;
+vector<int>producer_input, consumer_input;
+void producer(int id, int produce_count)
+{
+    for(int i=0; i<produce_count; i++)
+    {
+        int item= rand()%100;
+        if(sem_trywait(&empty_slots)!=0)
+        {
+            lock_guard<mutex>lock(buffer_mutex);
+            cout<<"[Buffer Full] Producer "<<id<<" is waiting...\n";
+        }
+        sem_wait(&empty_slots);
+        sem_wait(&mutix);
+        {
+            lock_guard<mutex>lock(buffer_mutex);
+            buffer.push(item);
+            cout<<"Producer "<<id<<" produced : "<<item<<endl;
+        }
+        sleep(1);
+        sem_post(&mutix);
+        sem_post(&full_slots);
+        sleep(1);
+    }
+}
+void consumer(int id, int consume_count)
+{
+    for(int i=0; i<consume_count; i++)
+    {
+        if(sem_trywait(&full_slots)!=0)
+        {
+            lock_guard<mutex>lock(buffer_mutex);
+            cout<<"[Buffer Empty] Consumer "<<id<<" is waiting...\n";
+        }
+        sem_wait(&full_slots);
+        sem_wait(&mutix);
+        int item;
+        {
+            lock_guard<mutex>lock(buffer_mutex);
+            item=buffer.front();
+            cout<<"Consumer "<<id<<" consumed: "<<item<<endl;
+        }
+        sleep(1);
+        sem_post(&mutix);
+        sem_post(&empty_slots);
+        sleep(1);
+    }
+}
+int main()
+{
+    int pro_count, con_count;
+    cout<<"Enter number of Producers: ";
+    cin>>pro_count;
+    cout<<"Enter number of Consumer: ";
+    cin>>con_count;
+    vector<thread>producers, consumers;
+    sem_init(&empty_slots, 0, buffer_size);
+    sem_init(&full_slots, 0, 0);
+    sem_init(&mutix, 0, 1);
+    for(int i=0; i<pro_count; i++)
+    {
+        cout<<"Enter the number of items for Producer "<<i+1<<" : ";
+        int a=0; cin>>a;
+        producer_input.push_back(a);
+    }
+    for(int i=0; i<con_count; i++)
+    {
+        cout<<"Enter the number of items for Consumer "<<i+1<<" : ";
+        int a=0; cin>>a;
+        consumer_input.push_back(a);
+    }
+    for(int i=0; i<pro_count; i++)
+        producers.push_back(thread(producer, i+1, producer_input[i]));
+    for(int i=0; i<con_count; i++)
+        consumers.push_back(thread(consumer, i+1, consumer_input[i]));
+    for(auto&p: producers)p.join();
+    for(auto&c: consumers)c.join();
+    sem_destroy(&empty_slots);
+    sem_destroy(&full_slots);
+    sem_destroy(&mutix);
+}
+
+
+8.Counting
+
+#include<bits/stdc++.h>
+#include<thread>
+#include<semaphore.h>
+#include<mutex>
+#ifdef _WIN32
+   #include<windows.h>
+   #define sleep(x) Sleep(1000*(x))
+#else
+   #include<unistd.h>
+#endif
+using namespace std;
+sem_t write_access, read_count_access;
+int reader_count=0;
+vector<int>reader_input, writer_input;
+mutex cout_mutex;
+void reader(int id, int read_times)
+{
+    for(int i=0; i<read_times; i++)
+    {
+        sem_wait(&read_count_access);
+        reader_count++;
+        if(reader_count==1)
+            sem_wait(&write_access);
+        sem_post(&read_count_access);
+        {
+            lock_guard<mutex>lock(cout_mutex);
+            cout<<"Reader "<<id<<" read "<<i+1<<endl;
+        }
+        if(sem_trywait(&write_access)!=0)
+        {
+            lock_guard<mutex>lock(cout_mutex);
+            cout<<"Reader "<<id<<" waiting for writer to finish writing...\n";
+        }
+        sleep(1);
+        sem_wait(&read_count_access);
+        reader_count--;
+        if(reader_count==0)
+            sem_post(&write_access);
+        sem_post(&read_count_access);
+        sleep(1);
+    }
+}
+void writer(int id, int write_times)
+{
+    for(int i=0; i<write_times; i++)
+    {
+        if(sem_trywait(&write_access)!=0)
+        {
+            lock_guard<mutex>lock(cout_mutex);
+            cout<<"Writer "<<id<<" is waiting for another writer of reader to finish...\n";
+        }
+        sem_wait(&write_access);
+        {
+            lock_guard<mutex>lock(cout_mutex);
+            cout<<"Writer "<<id<<" write : "<<i+1<<endl;
+        }
+        sleep(1);
+        sem_post(&write_access);
+    }
+}
+int main()
+{
+    int reader_count, writer_count;
+    cout<<"Enter the number of Readers: ";
+    cin>>reader_count;
+    cout<<"Enter the number of Writers: ";
+    cin>>writer_count;
+    vector<thread>readers, writers;
+    sem_init(&read_count_access, 0, 1);
+    sem_init(&write_access, 0, 1);
+    for(int i=0; i<reader_count; i++)
+    {
+        cout<<"Enter the number of reads for Reader "<<i+1<<" : ";
+        int a; cin>>a;
+        reader_input.push_back(a);
+    }
+     for(int i=0; i<writer_count; i++)
+    {
+        cout<<"Enter the number of writes for Writer "<<i+1<<" : ";
+        int a; cin>>a;
+        writer_input.push_back(a);
+    }
+    for(int i=0; i<reader_count; i++)
+        readers.push_back(thread(reader, i+1, writer_input[i]));
+    for(int i=0; i<writer_count; i++)
+        writers.push_back(thread(writer, i+1, writer_input[i]));
+    for(auto &r:readers)r.join();
+    for(auto &w:writers)w.join();
+    sem_destroy(&read_count_access);
+    sem_destroy(&write_access);
+}
+
+
+9.First
+
+#include<bits/stdc++.h>
+using namespace std;
+struct block
+{
+    int s; bool is_free; int allocated_process_index;
+};
+struct process
+{
+    int s; int allocated_block_index;
+};
+class pallocator
+{
+public:
+    vector<block>blocks;
+    vector<process>processes;
+    void add_block(int s)
+    {
+        block b={s,true,-1};
+        blocks.push_back(b);
+    }
+    void add_process(int s)
+    {
+        process p={s,-1};
+        processes.push_back(p);
+    }
+    void allocate_memory()
+    {
+        cout<<endl;
+        int n1=processes.size(), n2=blocks.size();
+        for(int i=0; i<n1; i++)
+        {
+            bool allocated=false;
+            for(int j=0; j<n2; j++)
+            {
+                if(blocks[j].is_free && blocks[j].s>=processes[i].s)
+                {
+                    blocks[j].is_free=false;
+                    blocks[j].allocated_process_index=i+1;
+                    processes[i].allocated_block_index=j+1;
+                    cout<<"Process "<<i+1<<" is allocated to Block "<<j+1<<endl;
+                    allocated=true; break;
+                }
+            }
+            if(!allocated)
+            {
+                cout<<"Process "<<i+1<<" could not be allocated a memory...\n";
+            }
+        }
+    }
+    void display_memory_stat()
+    {
+        cout<<"Memory allocation status \n";
+        for(int i=0; i<blocks.size(); i++)
+        {
+            if(!blocks[i].is_free)
+                cout<<"Block "<<i+1<<" size ("<<blocks[i].s<<") is allocated to Process "<<blocks[i].allocated_process_index<<endl;
+            else
+                cout<<"Block "<<i+1<<" size ("<<blocks[i].s<<") is Free.\n";
+
+        }
+    }
+};
+int main()
+{
+    pallocator all;
+    int num_blocks, num_process;
+    cout<<"Enter the number of memory blocks: ";
+    cin>>num_blocks;
+    cout<<"Enter the number of processes: ";
+    cin>>num_process;
+    for(int i=0; i<num_blocks; i++)
+    {
+        int s;
+        cout<<"Enter the size of memory block "<<i+1<<" : ";
+        cin>>s;
+        all.add_block(s);
+    }
+    for(int i=0; i<num_process; i++)
+    {
+        int s;
+        cout<<"Enter the size of process "<<i+1<<" : ";
+        cin>>s;
+        all.add_process(s);
+    }
+    cout<<"Initial Memory status...\n";
+    all.display_memory_stat();
+    all.allocate_memory();
+    cout<<"\nMemory status after allocation..\n";
+    all.display_memory_stat();
+}
+
+
+10.Best
+
+#include<bits/stdc++.h>
+using namespace std;
+struct block
+{
+    int s; bool is_free; int allocated_process_index;
+};
+struct process
+{
+    int s; int allocated_block_index;
+};
+class pallocator
+{
+public:
+    vector<block>blocks;
+    vector<process>processes;
+    void add_block(int s)
+    {
+        block b={s,true,-1};
+        blocks.push_back(b);
+    }
+    void add_process(int s)
+    {
+        process p={s,-1};
+        processes.push_back(p);
+    }
+    void allocate_memory()
+    {
+        cout<<endl;
+        int n1=processes.size(), n2=blocks.size(), mindiff=INT_MAX, best_fit_index=-1, diff;
+        for(int i=0; i<n1; i++)
+        {
+             best_fit_index=-1;
+             mindiff=INT_MAX;
+            for(int j=0; j<n2; j++)
+            {
+                if(blocks[j].is_free && blocks[j].s>=processes[i].s)
+                {
+                    diff=blocks[j].s-processes[i].s;
+                    if(diff<mindiff)
+                    {
+                        mindiff=diff;
+                        best_fit_index=j;
+                    }
+                }
+            }
+            if(best_fit_index!=-1)
+            {
+                blocks[best_fit_index].allocated_process_index=i+1;
+                blocks[best_fit_index].is_free=false;
+                processes[i].allocated_block_index=best_fit_index+1;
+                cout<<"Process "<<i+1<<" is allocated to Block "<<best_fit_index+1<<endl;
+            }
+        }
+    }
+    void display_memory_stat()
+    {
+        cout<<"Memory allocation status \n";
+        for(int i=0; i<blocks.size(); i++)
+        {
+            if(!blocks[i].is_free)
+                cout<<"Block "<<i+1<<" size ("<<blocks[i].s<<") is allocated to Process "<<blocks[i].allocated_process_index<<endl;
+            else
+                cout<<"Block "<<i+1<<" size ("<<blocks[i].s<<") is Free.\n";
+
+        }
+    }
+};
+int main()
+{
+    pallocator all;
+    int num_blocks, num_process;
+    cout<<"Enter the number of memory blocks: ";
+    cin>>num_blocks;
+    cout<<"Enter the number of processes: ";
+    cin>>num_process;
+    for(int i=0; i<num_blocks; i++)
+    {
+        int s;
+        cout<<"Enter the size of memory block "<<i+1<<" : ";
+        cin>>s;
+        all.add_block(s);
+    }
+    for(int i=0; i<num_process; i++)
+    {
+        int s;
+        cout<<"Enter the size of process "<<i+1<<" : ";
+        cin>>s;
+        all.add_process(s);
+    }
+    cout<<"Initial Memory status...\n";
+    all.display_memory_stat();
+    all.allocate_memory();
+    cout<<"\nMemory status after allocation..\n";
+    all.display_memory_stat();
+}
+
+11.FIFO
+
+#include <iostream>
+#include <queue>
+#include <unordered_set>
+#include <iomanip> // For setprecision
+#include <vector>
+using namespace std;
+
+void FIFO_PageReplacement(const vector<int>& pages, int capacity) {
+    unordered_set<int> memory;
+    queue<int> fifo_queue;
+    int page_faults = 0;
+    int page_hits = 0;
+
+    for (int i = 0; i < pages.size(); i++) {
+        int page = pages[i];
+
+        if (memory.find(page) == memory.end()) {
+            page_faults++;
+
+            if (memory.size() == capacity) {
+                int oldest = fifo_queue.front();
+                fifo_queue.pop();
+                memory.erase(oldest);
+            }
+
+            memory.insert(page);
+            fifo_queue.push(page);
+        } else {
+            page_hits++;
+        }
+    }
+
+    // Calculate ratios
+    double hit_ratio = (double)page_hits * 100 / pages.size();
+    double miss_ratio = (double)page_faults * 100 / pages.size();
+
+    // Display final statistics
+    cout << "\nFinal Statistics:\n";
+    cout << "----------------------------------------\n";
+    cout << left << setw(25) << "Total References:" << right << setw(10) << pages.size() << endl;
+    cout << left << setw(25) << "Page Hits:" << right << setw(10) << page_hits << endl;
+    cout << left << setw(25) << "Page Faults:" << right << setw(10) << page_faults << endl;
+    cout << left << setw(25) << "Hit Ratio:" << right << setw(9) << fixed << setprecision(2) << hit_ratio << "%" << endl;
+    cout << left << setw(25) << "Miss Ratio:" << right << setw(9) << fixed << setprecision(2) << miss_ratio << "%" << endl;
+}
+
+int main() {
+    int capacity, n;
+    vector<int> pages;
+
+    cout << "Enter number of frames: ";
+    cin >> capacity;
+
+    cout << "Enter number of page references: ";
+    cin >> n;
+
+    cout << "Enter page reference sequence (space separated): ";
+    for (int i = 0; i < n; i++) {
+        int page;
+        cin >> page;
+        pages.push_back(page);
+    }
+
+    FIFO_PageReplacement(pages, capacity);
+
+    return 0;
+}
+
+
+12.OPTIMAL
+
+#include <iostream>
+#include <vector>
+#include <iomanip>
+#include <algorithm>
+using namespace std;
+
+int findPageToReplace(const vector<int>& memory, const vector<int>& pages, int currentIndex) {
+    int farthest = -1;
+    int replaceIndex = -1;
+
+    for (int i = 0; i < memory.size(); i++) {
+        int page = memory[i];
+        bool found = false;
+
+        for (int j = currentIndex + 1; j < pages.size(); j++) {
+            if (pages[j] == page) {
+                if (j > farthest) {
+                    farthest = j;
+                    replaceIndex = i;
+                }
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            return i; // Replace page that won't be used again
+        }
+    }
+
+    return replaceIndex;
+}
+
+void Optimal(const vector<int>& pages, int TF) {
+    vector<int> memory;
+    int faults = 0;
+    int hits = 0;
+
+    for (int i = 0; i < pages.size(); i++) {
+        int page = pages[i];
+        auto it = find(memory.begin(), memory.end(), page);
+
+        if (it != memory.end()) {
+            hits++;
+        } else {
+            faults++;
+            if (memory.size() < TF) {
+                memory.push_back(page);
+            } else {
+                int index = findPageToReplace(memory, pages, i);
+                memory[index] = page;
+            }
+        }
+    }
+
+    double hitratio = (double)hits * 100 / pages.size();
+    double faultratio = (double)faults * 100 / pages.size();
+
+    cout << "Total Frames: " << TF << endl;
+    cout << "Total Pages: " << pages.size() << endl;
+    cout << "Total Hits: " << hits << endl;
+    cout << "Total Faults: " << faults << endl;
+    cout << "Hit Ratio: " << fixed << setprecision(2) << hitratio << "%" << endl;
+    cout << "Miss Ratio: " << fixed << setprecision(2) << faultratio << "%" << endl;
+}
+
+int main() {
+    int TF, TP;
+    vector<int> pages;
+
+    cout << "Total Frames: ";
+    cin >> TF;
+
+    cout << "Total Pages: ";
+    cin >> TP;
+
+    cout << "References: ";
+    for (int i = 0; i < TP; i++) {
+        int page;
+        cin >> page;
+        pages.push_back(page);
+    }
+
+    Optimal(pages, TF);
+
+    return 0;
+}
+
+13.LRU
+
+#include<bits/stdc++.h>
+using namespace std;
+void LRU(const vector<int>&pages, int TF)
+{
+    vector<int>memory;
+    int faults=0;
+    int hits=0;
+    for(int page : pages){
+
+    auto it= find(memory.begin(),memory.end(),page);
+
+    if(it == memory.end())
+    {
+        faults++;
+        if(memory.size()==TF){
+            memory.erase(memory.begin());
+        }
+        memory.push_back(page);
+    }
+    else{
+        hits++;
+        memory.erase(it);
+        memory.push_back(page);
+    }
+
+    }
+    double hitratio=(double)hits*100/pages.size();
+    double faultratio=(double)faults*100/pages.size();
+    cout<<"Total Frames: "<<TF<<endl;
+    cout<<"Total Pages: "<<pages.size()<<endl;
+    cout<<"Total Hits: "<<hits<<endl;
+    cout<<"Total Faults: "<<faults<<endl;
+    cout<<"Hit Ratio: "<<fixed<<setprecision(2)<<hitratio<<"%"<<endl;
+    cout<<"Miss Ratio: "<<fixed<<setprecision(2)<<faultratio<<"%"<<endl;
+}
+int main()
+{
+    int TF, TP;
+    vector<int>pages;
+    cout<<"Total Frames: ";
+    cin>>TF;
+    cout<<"Total Pages: ";
+    cin>>TP;
+    cout<<"References: ";
+    for(int i=0;i<TP;i++)
+    {
+        int page;
+        cin>>page;
+        pages.push_back(page);
+    }
+    LRU(pages,TF);
+}
+
+
+14.Equal Frame
+
+#include<bits/stdc++.h>
+using namespace std;
+void Fallocation(int F,int P)
+{
+    if(P<=0)
+        cout<<"No Process Found"<<endl;
+
+    int FPP= F/P;
+    int RF= F%P;
+    cout<<"Equal Frame Allocation: "<<endl;
+    cout<<"Total Frames: "<<F<<endl;
+    cout<<"Number of Processes : "<<P<<endl;
+    cout<<"Frames Per Process: "<<FPP<<endl;
+    if(RF>0)cout<<RF<<" Extra Unallocated Frames"<<endl;
+    cout<<"Allocated Frame Table: "<<endl;
+    cout<<"Process\tAllocated"<<endl;
+   for(int i=0;i<P;i++) {
+
+        cout<<"P"<<i+1<<"\t"<<FPP<<endl;
+}
+}
+int main()
+{
+    int TF,NP;
+    cout<<"Total Frames: ";
+    cin>>TF;
+    cout<<"Total Processes: ";
+    cin>>NP;
+    Fallocation(TF,NP);
+    return 0;
+}
+
+
